@@ -1,0 +1,172 @@
+<html>
+
+<head></head>
+<style>
+    body {
+        text-align: center;
+    }
+
+    #board {
+        margin: auto;
+        width: 930px;
+    }
+
+    #board button {
+        height: 200px;
+        width: 300px;
+        margin: 0px;
+        padding: 0px;
+        float: left;
+        margin-right: 10px;
+        font-size: 10em;
+    }
+
+    .name-form {
+        height: 48px;
+        width: 300px;
+        margin: 0px;
+        padding: 0px;
+        float: left;
+        margin-right: 10px;
+        margin-bottom: 30px;
+        font-size: 3em;
+    }
+</style>
+<div id="board">
+    <H1 id="messages"></H1>
+</div>
+<div>
+    <input type="file" id="file-selector" accept=".jpg,.jpeg,.bmp,.png" multiple>
+</div>
+<script>
+    var myTurn = true,
+        mySymbol = "O",
+        symbol = "O",
+        boardState = [];
+
+    function isGameOver() {
+        var // One of the rows must be equal to either of these
+            // value for
+            // the game to be over
+            matches = ["XXX", "OOO"],
+            // These are all of the possible combinations
+            // that would win the game
+            rows = [
+                boardState[0].btn.innerHTML + boardState[1].btn.innerHTML + boardState[2].btn.innerHTML,
+                boardState[3].btn.innerHTML + boardState[4].btn.innerHTML + boardState[5].btn.innerHTML,
+                boardState[6].btn.innerHTML + boardState[7].btn.innerHTML + boardState[8].btn.innerHTML,
+                boardState[0].btn.innerHTML + boardState[4].btn.innerHTML + boardState[8].btn.innerHTML,
+                boardState[2].btn.innerHTML + boardState[4].btn.innerHTML + boardState[6].btn.innerHTML,
+                boardState[0].btn.innerHTML + boardState[3].btn.innerHTML + boardState[6].btn.innerHTML,
+                boardState[1].btn.innerHTML + boardState[4].btn.innerHTML + boardState[7].btn.innerHTML,
+                boardState[2].btn.innerHTML + boardState[5].btn.innerHTML + boardState[8].btn.innerHTML
+            ];
+
+        // Loop over all of the rows and check if any of them compare
+        // to either 'XXX' or 'OOO'
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i] === matches[0] || rows[i] === matches[1]) {
+                return true;
+            }
+        }
+    }
+
+    function renderTurnMessage() {
+        // Disable the board if it is the opponents turn
+        if (!myTurn) {
+            document.getElementById('messages').innerHTML = `Your opponent's turn`;
+        } else {
+            document.getElementById('messages').innerHTML = 'Your turn.';
+        }
+    }
+
+    function makeMove(btn) {
+        // The space is already checked
+        if (btn.innerHTML === "O" || btn.innerHTML === "X") {
+            return;
+        }
+
+        btn.innerHTML = symbol;
+        symbol = symbol === "X" ? "O" : "X";
+        myTurn = symbol === mySymbol;
+
+        // If the game is still going, show who's turn it is
+        if (!isGameOver()) {
+            renderTurnMessage();
+
+            // If the game is over
+        } else {
+            // Show the message for the loser
+            if (myTurn) {
+                document.getElementById('messages').innerHTML = "Game over. You lost.";
+
+                // Show the message for the winner
+            } else {
+                document.getElementById('messages').innerHTML = "Game over. You won!";
+            }
+
+            Object.entries(boardState).forEach(([_, elem]) => elem.btn.disabled = true);
+        }
+    }
+
+    function initBoard() {
+        const board = document.getElementById("board");
+        for (let i = 0; i < 9; i++) {
+            const button = document.createElement("button");
+            button.id = `btn_${i}`;
+            button.onclick = () => makeMove(button);
+            boardState[i] = {
+                btn: button
+            }
+            board.append(button)
+
+            if (i % 3 === 2) {
+                for (let j = i - 2; j <= i; j++) {
+                    const p = document.createElement("p");
+                    p.classList.add('name-form');
+                    boardState[j].nameForm = p;
+                    board.append(p)
+                }
+            }
+        }
+    }
+
+    // Set up the initial state when the game begins
+    function gameBegin() {
+        initBoard();
+
+        // Give X the first turn
+        myTurn = symbol === mySymbol;
+        renderTurnMessage();
+    }
+
+    // Disable the board if the opponent leaves
+    function opponentLeft() {
+        $("#messages").text("Your opponent left the game.");
+        $(".board button").attr("disabled", true);
+    }
+
+    gameBegin();
+</script>
+
+<script>
+    const fileSelector = document.getElementById("file-selector");
+    fileSelector.addEventListener("change", (evt) => {
+        loadImages(evt.target.files)
+    }, false);
+
+    function loadImages(files) {
+        Object.entries(boardState).forEach(([_, elem], idx) => {
+            if (idx >= files.length)
+                return
+
+            elem.btn.style.backgroundRepeat = 'no-repeat';
+            elem.btn.style.backgroundImage = `url(${URL.createObjectURL(files[idx])})`;
+            elem.btn.style.backgroundSize = 'contain';
+            elem.btn.style.backgroundPosition = 'center';
+            elem.nameForm.innerHTML = files[idx].name.split('.')[0].split('').map((char, idx) => idx === 0 ? char.toUpperCase() : char.toLowerCase()).join('');
+        })
+    }
+</script>
+
+</html>

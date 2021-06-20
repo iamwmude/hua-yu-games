@@ -1,0 +1,12 @@
+{
+  "name": "hua-yu-game",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "fs": "^0.0.1-security",
+    "http": "^0.0.1-security",
+    "socket.io": "^4.0.1"
+  }
+}
